@@ -1,0 +1,54 @@
+.App {
+  text-align: center;
+  width: 100%;
+  margin: 0;
+  height: 100%;
+  padding: 10px !important;
+}
+
+.App-logo {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+.p-20{
+  padding: 20px;
+}
+
+
+
+body{ background-color: #F5F5F5; }
+
+
+
+
+
+
+
+.App-link {
+  color: #61dafb;
+}
+
+.ui.dropdown .menu {
+  left: -74px !important;
+}
+
+
+
+
+
+
+
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

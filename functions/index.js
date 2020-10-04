@@ -1,5 +1,5 @@
 const functions = require('firebase-functions');
-
+const cors = require('cors')({ origin: true });
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
@@ -12,13 +12,55 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
 
-// Take the text parameter passed to this HTTP endpoint and insert it into 
-// Cloud Firestore under the path /messages/:documentId/original
-exports.addFeeds = functions.https.onRequest(async (req, res) => {
-    // Grab the text parameter.
-    const {title, description, image, userId } = req.body;
-    // Push the new message into Cloud Firestore using the Firebase Admin SDK.
-    const writeResult = await admin.firestore().collection('feeds').add({ title, description, image, createdDate: new Date(), userId });
-    // Send back a message that we've succesfully written the message
-    res.json({ result: `Message with ID: ${writeResult.id} added.` });
+/**
+ * Cloud Firestore under the path /addFeed
+ * This is used for add feed
+ */
+exports.addFeed = functions.https.onRequest(async (req, res) => {
+    cors(req, res, async () => {
+        const { title = '', description = '', image = '', userId = '' } = JSON.parse(req.body);
+        console.log(title, description, image, userId, req.body);
+        const feed = await (await admin.firestore().collection('feeds').add({ title, description, image, createdDate: new Date(), userId })).get();
+        res.json({
+            result: `Feed has added successfully`, feed: Object.assign({}, feed.data(), {
+                id: feed.id
+            })
+        });
+    });
 });
+
+/**
+ * Cloud Firestore under the path /updateFeed
+ * This is used for update feed by ID
+ */
+exports.updateFeed = functions.https.onRequest(async (req, res) => {
+    cors(req, res, async () => {
+        const { title = '', description = '', image = '', userId = '', id } = JSON.parse(req.body);
+        const feed = await admin.firestore().collection('feeds').doc(id).update({ title, description, image, createdDate: new Date(), userId });
+        res.json({
+            result: `Feed has updated successfully`, feed: {
+                title, description, image, userId,
+                id: feed.id
+            }
+        });
+    });
+});
+
+/**
+ * Cloud Firestore under the path /feeds
+ * This is used for get feed by user id
+ */
+exports.feeds = functions.https.onRequest(async (req, res) => {
+    cors(req, res, async () => {
+        const { userId } = req.query;
+        const feeds = await admin.firestore().collection('feeds').where("userId", "==", userId).get();
+        res.json({
+            feeds: feeds.docs.map(doc => (
+                Object.assign({}, doc.data(), {
+                    id: doc.id
+                })
+            ))
+        });
+    });
+});
+
